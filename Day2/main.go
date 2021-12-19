@@ -42,30 +42,36 @@ func readcsv(file string) [][]string {
 	return csvLines
 }
 
-func calculate (records [][]string) (int, int) {
+func calculate (records [][]string) (int, int, int) {
 	var horizontal int
 	var depth int
-	for i := 0; i <len(records)-1; i++ {
+	var depth2 int
+	var aim int
+	for i := 0; i <len(records); i++ {
 		command := records[i][0]
 		value,_ := strconv.Atoi(records[i][1])
 		
 		if command == "forward" {
 			horizontal += value
+			depth2 += (aim * value)
 		} else if command == "down" {
 			depth += value
+			aim += value
 		} else if command == "up" {
 			depth -= value
+			aim -= value
 		}
 	}
-	return horizontal,depth 
+	return horizontal,depth, depth2
 }
 func main() {
 file := fileinput()
 records := readcsv(file)
-Horizontal, Depth := calculate(records)
+Horizontal, Depth, Depth2 := calculate(records)
 fmt.Println("Horizontal:",Horizontal)
 fmt.Println("Depth:", Depth)
 fmt.Println("Answer:", (Horizontal*Depth))
+fmt.Println("Answer 2:",(Depth2*Horizontal))
 
 
 }
