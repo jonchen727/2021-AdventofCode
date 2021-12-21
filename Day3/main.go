@@ -1,192 +1,140 @@
 package main
 
 import (
-	"encoding/csv"
 	"fmt"
-
-	//  "log"
+	"io/ioutil"
+	"math"
 	"os"
 	"strconv"
 	"strings"
-	//  "reflect"
+	"time"
 )
 
-func fileinput() string {
+func FiletoArray(delim string) []string {
+	var lines []string
 
-	file := os.Args[1]
-
-	if strings.Contains(file, ".csv") {
-	} else {
-		fmt.Println("Please select a csv file")
-		os.Exit(1)
-	}
-	return file
-}
-
-func readcsv(file string) [][]string {
-	csvFile, err := os.Open(file)
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println("Successfully Opened CSV")
-	defer csvFile.Close()
-
-	r := csv.NewReader(csvFile)
-
-	csvLines, err := r.ReadAll()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return csvLines
-}
-
-func counter(records [][]string, index int) string {
-	var count0 int
-	var count1 int
-	var result string
-	for j := 0; j < len(records); j++ {
-		character := string(([]rune(records[j][0]))[index])
-		if character == "0" {
-			//fmt.Println("its a 0")
-			count0 += 1
-		} else if character == "1" {
-			//fmt.Println("its a 1")
-			count1 += 1
+	if len(os.Args) > 1 { // if file argument is provided
+		file := os.Args[1]                  //takes 1st arg as file name
+		if strings.Contains(file, ".txt") { //checks if file is .txt
+			bytes1, _ := ioutil.ReadFile(file)    //read file convert to bytes
+			input := string(bytes1)               //convert bytes to string
+			lines = strings.Split((input), delim) //convert string to []string with function input as delimiter
+		} else { // exit for non text file input
+			fmt.Println("Please select a text file") //exits if not .txt file
+			os.Exit(69)
 		}
+	} else { // exit for no argument input
+		fmt.Println("Cannot run command with no file.")
+		os.Exit(420)
 	}
-	if count0 > count1 {
-		result = "0"
-	} else if count0 < count1 {
-		result = "1"
-	} else if count0 == count1 {
-		result = "same"
-	}
-	return result
+
+	return lines //returns final []string
 }
 
-func stringmaker(records [][]string) (string, string) {
-	var gamma string
-	var epsilon string
+func PowerConsumption(lines []string) (string, int, string, int, int) {
+	sums := make([]int, len(lines[0])) //creates an int array with number of characters on a single line
 
-	for i := 0; i < len(records[0][0]); i++ {
-		result := counter(records, i)
-		if result == "0" {
-			gamma += "0"
-			epsilon += "1"
-		} else {
-			gamma += "1"
-			epsilon += "0"
-		}
-
-	}
-	return gamma, epsilon
-}
-
-func co2scrub(records [][]string) string {
-	co2record := records
-	for i := 0; i < len(records[0][0]); i++ {
-		result := counter(co2record, i)
-		//fmt.Println("Result:", result)
-		for j := 0; i < len(records); j++ {
-
-			ctr := len(co2record)
-			fmt.Println(j, ctr)
-			if (j < ctr-1)  {
-
-				character := string(([]rune(co2record[j][0]))[i])
-				fmt.Println("Index:", i, "Line:", j, "Character:", character)
-				fmt.Println(co2record)
-				if result == character {
-					//fmt.Println("case 1")
-					co2record = append(co2record[:j], co2record[j+1:]...)
-					j -= 1
-					ctr -= 1
-					//co2record2 = append(oxyge)
-				} else if result == "same" && character == "1" {
-					//fmt.Println("case 2")
-					co2record = append(co2record[:j], co2record[j+1:]...)
-					j -= 1
-					ctr -= 1
-				} else if result == "same" && character == "0" {
-					//fmt.Println("case 3")
-				} else if result != character {
-					//fmt.Println("case 4")
-				}
-			} else {
-				//fmt.Println("done")
-				break
+	for _, line := range lines { //iterates over each line
+		for j, character := range line { //iterates over each index
+			if string(character) == "1" {
+				sums[j] += 1 //adds 1 to sum array with index equal to j this gives number of 1's per index summed per row
 			}
 		}
 	}
-	return co2record[0][0]
-}
-func oxygengen(records [][]string) string {
-	oxygenrecord := records
-	fmt.Println(oxygenrecord)
-	for i := 0; i < len(records[0][0]); i++ {
-		result := counter(oxygenrecord, i)
-		//fmt.Println("Result:",result)
-		for j := 0; i < len(records); j++ {
-			ctr := len(oxygenrecord)
-			fmt.Println(j,ctr)
-			if j < ctr {
-				character := string(([]rune(oxygenrecord[j][0]))[i])
-				//fmt.Println("Index:",i,"Line:",j,"Character:", character,"Result:",result)
-				//mt.Println(oxygenrecord)
-				if result == character {
-					//fmt.Println("case 1")
-					//oxygenrecord2 = append(oxyge)
-				} else if result == "same" && character == "1" {
-					//fmt.Println("case 2")
-				} else if result == "same" && character == "0" {
-					//fmt.Println("case 3")
-					oxygenrecord = append(oxygenrecord[:j], oxygenrecord[j+1:]...)
-					j -= 1
-					ctr -= 1
-				} else if result != character {
-					//fmt.Println("case 4")
-					oxygenrecord = append(oxygenrecord[:j], oxygenrecord[j+1:]...)
-					j -= 1
-					ctr -= 1
-				}
-			} else {
-				//fmt.Println("done")
-				break
-			}
+	var gammab string
+	gamma := 0
+	var epsilonb string
+	epsilon := 0
+
+	for j, sum := range sums { // will interate up from 0 to range of sums (5)
+		index := len(sums) - j - 1 //calculates index by subtracting 5-1 to get index 0,4 and then subtracts iterative count binary is reverse ordered
+		if sum > len(lines)/2 {    //if 1's are greater
+			gamma += int(math.Exp2(float64(index))) //uses exp2 on index to convert binary to dec
+			gammab += "1"                           //if 1s are greater add 1 to gamma binary string
+			epsilonb += "0"                         //if 0's are lesser add 1 to epsilon binary string
+		} else { //uses inverse case where 1's are less to generate a 5 bit string
+			epsilon += int(math.Exp2(float64(index)))
+			gammab += "0"   //if 0's are greater add 0 to gamma binary string
+			epsilonb += "1" //if 1's are lesser add 1 to epsilon binary string
 		}
 	}
-	return oxygenrecord[0][0]
+	return gammab, gamma, epsilonb, epsilon, (gamma * epsilon)
+}
+
+func GasSystem(lines []string, mode string) (int64, string) {
+	var gas int64
+	var gas_b string
+	//var CO2 int64
+	//var CO2_b string
+	index := 0
+	sum := 0
+	currentLines := lines
+	var Lines_0 []string
+	var Lines_1 []string
+
+	for { //infinite for loop
+		for _, line := range currentLines { //iterate for lines in set of current lines
+			if string(line[index]) == "1" { //since this is with in a for loop each instances is type string so index can be used
+				sum += 1                        // counter for number of 1's in index
+				Lines_1 = append(Lines_1, line) // adds current line to array
+			} else {
+				Lines_0 = append(Lines_0, line) // adds current line to array
+			}
+		}
+
+		index += 1 //increase index for next loop
+		if mode == "O2" {
+			if len(Lines_1) >= len(Lines_0) { //if there are GTE 1's at index position than 0's
+				currentLines = Lines_1 //set currentLines to lines with most index position 1's
+			} else {
+				currentLines = Lines_0 //else set currentLines to lines with most index position 0's
+			}
+		} else if mode == "CO2" {
+			if len(Lines_1) >= len(Lines_0) { //if there are GTE 1's at index position than 0's
+				currentLines = Lines_0 //set currentLines to lines with least index position 0's
+			} else {
+				currentLines = Lines_1 //else set currentLines to lines with least index position 1's
+			}
+		}
+
+		Lines_0 = nil
+		Lines_1 = nil
+
+		if len(currentLines) == 1 { //when there is one line left
+			gas_b = currentLines[0]                 //set oxygen binary to last line
+			gas, _ = strconv.ParseInt(gas_b, 2, 64) //convert binary to base64 dec
+			break
+		}
+	}
+	return gas, gas_b
+}
+
+func LifeSupport(lines []string) (int64, string, int64, string, int64) {
+	O2, O2_b := GasSystem(lines, "O2")
+	CO2, CO2_b := GasSystem(lines, "CO2")
+
+	return O2, O2_b, CO2, CO2_b, (O2 * CO2)
 }
 
 func main() {
-	file := fileinput()
-	records := readcsv(file)
-	fmt.Println(records)
-	gamma, epsilon := stringmaker(records)
-	gammanum, _ := strconv.ParseInt(gamma, 2, 64)
-	epsilonnum, _ := strconv.ParseInt(epsilon, 2, 64)
-	oxygenrecords := records
-	co2records := records
+	start := time.Now() //sets current time to start time
 
-	fmt.Println(records)
-	oxygengen := oxygengen(oxygenrecords)
-	co2scrub := co2scrub(co2records)
-	fmt.Println(records)
-	
-	fmt.Println(records)
-	oxygengennum, _ := strconv.ParseInt(oxygengen, 2, 64)
-	co2scrubnum, _ := strconv.ParseInt(co2scrub, 2, 64)
-	fmt.Println("Gamma Binary:", gamma)
-	fmt.Println("Gamma:", gammanum)
-	fmt.Println("Epsilon Binary:", epsilon)
-	fmt.Println("Epsilon:", epsilonnum)
-	fmt.Println("Power Consumption:", (gammanum * epsilonnum))
-	fmt.Println("Oxygen Gen Binary:", oxygengen)
-	fmt.Println("Oxygen Gen:", oxygengennum)
-	fmt.Println("CO2 Scrub Binary:", co2scrub)
-	fmt.Println("CO2 Scrub:", co2scrubnum)
-	fmt.Println("Answer2:",(co2scrubnum*oxygengennum))
-	//co2record := records
+	lines := FiletoArray("\n")
 
+	gammab, gamma, epsilonb, epsilon, powerconsumption := PowerConsumption(lines)
+
+	fmt.Println("Gamma:", gamma, "Gamma Binary:", gammab)
+	fmt.Println("Epsilon:", epsilon, "Epsilon Binary:", epsilonb)
+	fmt.Println("Power Consumption:", powerconsumption)
+
+	O2, O2_b, CO2, CO2_b, Rating := LifeSupport(lines)
+
+	fmt.Println()
+	fmt.Println("Oxygen Generator Rating:", O2, "Oxygen Generator Rating Binary:", O2_b)
+	fmt.Println("CO2 Scrubber Rating:", CO2, "CO2 Scrubber Rating Binary:", CO2_b)
+	fmt.Println("Life Support Rating:", Rating)
+
+	fmt.Println()
+	duration := time.Since(start) //sets duration to time difference since start
+	fmt.Println("This Script took:", duration, "to complete!")
 }
