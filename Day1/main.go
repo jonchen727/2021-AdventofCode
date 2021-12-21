@@ -46,7 +46,7 @@ func increased (records [][]string) int{
   for i, line := range records {
     if i == 0 {
       newline, _  := strconv.Atoi(line[0])
-      //fmt.Println(newline,"First Line")
+      fmt.Println(newline,"First Line")
     }else if i >= 1 {
       //fmt.Println("Prev", prevline)
       newline, _ := strconv.Atoi(line[0])
