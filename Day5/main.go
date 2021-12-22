@@ -3,13 +3,11 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"strconv"
 	"math"
-
-
 	"os"
+	"strconv"
 	"strings"
-	//	"time"
+	"time"
 )
 
 func FiletoArray(delim string, arg int) []string {
@@ -33,10 +31,9 @@ func FiletoArray(delim string, arg int) []string {
 }
 
 type Point struct {
-	x int
-	y int
+	x   int
+	y   int
 	hit int
-
 }
 type Coordinate struct {
 	x1 int
@@ -49,32 +46,28 @@ type Coordinate struct {
 //	coordinates []Coordinate
 //}
 
-
 func main() {
-	lines := (FiletoArray("\n",1))
+	start := time.Now() //sets current time to start time
 
-	
+	lines := (FiletoArray("\n", 1))
 	var stCoords []Coordinate
-
 	stCoords = PopulateStruct(lines, stCoords)
-	
-	
-	X_max,Y_max := CoordinateRange(stCoords)
-
-	
+	X_max, Y_max := CoordinateRange(stCoords)
 	plane := CreatePlane(Y_max, X_max)
 
-	PopulatePlane(stCoords, plane)
+	PopulatePlaneAnswer1(stCoords, plane)
+	fmt.Println("Answer 1:", OverlapCounter(plane))
 
-	fmt.Println("Answer 1:",Answer1(plane))
+	PopulatePlaneAnswer2(stCoords, plane)
+	fmt.Println("Answer 2:", OverlapCounter(plane))
 
-	//for _,plane := range plane {
-	//	fmt.Println(plane)
-	//}
+	fmt.Println()
+	duration := time.Since(start) //sets duration to time difference since start
+	fmt.Println("This Script took:", duration, "to complete!")
 }
 
-func Answer1(plane [][]int) (int){
-	var cnt int
+func OverlapCounter(plane [][]int) int {
+	cnt := 0
 	for _, y := range plane {
 		for _, x := range y {
 			if x > 1 {
@@ -116,7 +109,7 @@ func CreatePlane(Y_max int, X_max int) [][]int {
 	return plane
 }
 
-func PopulatePlane(stCoords []Coordinate, plane [][]int) {
+func PopulatePlaneAnswer1(stCoords []Coordinate, plane [][]int) {
 	for _, stCoord := range stCoords {
 
 		if stCoord.x1 == stCoord.x2 {
@@ -140,10 +133,58 @@ func PopulatePlane(stCoords []Coordinate, plane [][]int) {
 	}
 }
 
+func PopulatePlaneAnswer2(stCoords []Coordinate, plane [][]int) {
+	for _, stCoord := range stCoords {
+		rise := float64(stCoord.y2) - float64(stCoord.y1)
+		run := float64(stCoord.x2) - float64(stCoord.x1)
+		//fmt.Println(stCoord)
+		slope := rise / run
+		if slope == 1 {
+			for i := 0; i <= int(math.Abs(float64(stCoord.y1)-float64(stCoord.y2))); i++ {
+				if rise > 0 {
+					//xmin := int(math.Min(float64(stCoord.x1), float64(stCoord.x2)))
+					x := stCoord.x1 + i
+					//ymin := int(math.Min(float64(stCoord.y1), float64(stCoord.y2)))
+					y := stCoord.y1 + i
+					//fmt.Println(x, y, 1)
+					plane[y][x] += 1
+				} else if rise < 0 {
+					x := stCoord.x1 - i
+					//ymin := int(math.Min(float64(stCoord.y1), float64(stCoord.y2)))
+					y := stCoord.y1 - i
+					//fmt.Println(x, y, 1)
+					plane[y][x] += 1
+
+				}
+
+			}
+		} else if slope == -1 {
+			for i := 0; i <= int(math.Abs(float64(stCoord.y1)-float64(stCoord.y2))); i++ {
+				if rise > 0 {
+					//xmin := int(math.Min(float64(stCoord.x1), float64(stCoord.x2)))
+					x := stCoord.x1 - i
+					///ymin := int(math.Min(float64(stCoord.y1), float64(stCoord.y2)))
+					y := stCoord.y1 + i
+					//fmt.Println(x, y, 1)
+					plane[y][x] += 1
+				} else if rise < 0 {
+					//xmin := int(math.Min(float64(stCoord.x1), float64(stCoord.x2)))
+					x := stCoord.x1 + i
+					///ymin := int(math.Min(float64(stCoord.y1), float64(stCoord.y2)))
+					y := stCoord.y1 - i
+					//fmt.Println(x, y, 1)
+					plane[y][x] += 1
+				}
+			}
+
+		}
+	}
+}
+
 func CoordinateRange(stCoords []Coordinate) (int, int) {
 	X_max := stCoords[0].x1
 	Y_max := stCoords[0].y1
-	
+
 	for _, line := range stCoords {
 		if line.x1 > X_max {
 			X_max = line.x1
@@ -156,6 +197,6 @@ func CoordinateRange(stCoords []Coordinate) (int, int) {
 			Y_max = line.y2
 		}
 	}
-	
+
 	return X_max, Y_max
 }
