@@ -47,23 +47,17 @@ func main() {
 	lines := (FiletoArray(",", 1))
 	ilines := StringtoInt(lines)
 
-
 	sd, average := MathStuff(ilines)
 
-	fmt.Printf ("##### Data Set Information #####\nAverage: %.0f \nStandard Deviation: %.0f \n", average, sd)
+	fmt.Printf("##### Data Set Information #####\nAverage: %.0f \nStandard Deviation: %.0f \n", average, sd)
 
+	startpoint := (int(average) - (int(sd) / 3))
 
-	startpoint := (int(average) - (int(sd)/3))
-	
-	Fuel1, Iterations1 :=  Answer1(sd, startpoint, ilines)
-	fmt.Printf("\nAnswer 1: %d fuel \nThis took %d Iterations\n", Fuel1,Iterations1)
+	Fuel1, Iterations1 := Answer1(sd, startpoint, ilines)
+	fmt.Printf("\nAnswer 1: %d fuel \nThis took %d Iterations\n", Fuel1, Iterations1)
 
-	
-	Fuel2, Iterations2 :=  Answer2(sd, startpoint, ilines)
-	fmt.Printf("\nAnswer 2: %d fuel \nThis took %d Iterations\n", Fuel2,Iterations2)
-
-
-
+	Fuel2, Iterations2 := Answer2(sd, startpoint, ilines)
+	fmt.Printf("\nAnswer 2: %d fuel \nThis took %d Iterations\n", Fuel2, Iterations2)
 
 	fmt.Println()
 	duration := time.Since(start) //sets duration to time difference since start
@@ -71,65 +65,26 @@ func main() {
 }
 
 func Answer1(sd float64, startpoint int, ilines []int) (int, int) {
-	var fuel float64 
+	var fuel float64
 	var fuelprev float64
 	var iterations int
 	for i := 0; i <= int(sd); i++ {
 		fuel = 0
 		if i == 0 {
-			
-			for _, line := range ilines {
-				fuel += math.Abs(float64(startpoint - line))
-			}
-			fuelprev = fuel
-		}else if i >= 1 {
-			for _, line := range ilines {
-				fuel += math.Abs(float64(startpoint - line))
-		}
-			if fuel > fuelprev { 
-				iterations = i
-				fuel=fuelprev 
-				break
-					
-			} else {
-				fuelprev = fuel
-			}
-		}
-		startpoint += 1
-		//fmt.Println(fuel)
-	}
-	return int(fuel),iterations
-}		
 
-func Answer2(sd float64, startpoint int, ilines []int) (int, int) {
-	var fuel float64 
-	var fuelprev float64
-	var iterations int
-	for i := 0; i <= int(sd); i++ {
-		//fmt.Println("Iteration:",i)
-		fuel = 0
-		if i == 0 {
-			for _,line := range ilines {
-				var distance int
-				distance = int(math.Abs(float64(startpoint - line)))
-				for j:=1 ; j <= distance; j++ {
-					fuel += float64(j)
-				}	
-			} 
-			fuelprev = fuel
-		}else if i >= 1 {
 			for _, line := range ilines {
-				var distance int
-				distance = int(math.Abs(float64(startpoint - line)))
-				for j:=1 ; j <= distance; j++ {
-					fuel += float64(j)
-		}
-	}
-			if fuel > fuelprev { 
+				fuel += math.Abs(float64(startpoint - line))
+			}
+			fuelprev = fuel
+		} else if i >= 1 {
+			for _, line := range ilines {
+				fuel += math.Abs(float64(startpoint - line))
+			}
+			if fuel > fuelprev {
 				iterations = i
-				fuel=fuelprev 
+				fuel = fuelprev
 				break
-					
+
 			} else {
 				fuelprev = fuel
 			}
@@ -138,11 +93,48 @@ func Answer2(sd float64, startpoint int, ilines []int) (int, int) {
 		//fmt.Println(fuel)
 	}
 	return int(fuel), iterations
-}	
+}
 
+func Answer2(sd float64, startpoint int, ilines []int) (int, int) {
+	var fuel float64
+	var fuelprev float64
+	var iterations int
+	for i := 0; i <= int(sd); i++ {
+		//fmt.Println("Iteration:",i)
+		fuel = 0
+		if i == 0 {
+			for _, line := range ilines {
+				var distance int
+				distance = int(math.Abs(float64(startpoint - line)))
+				for j := 1; j <= distance; j++ {
+					fuel += float64(j)
+				}
+			}
+			fuelprev = fuel
+		} else if i >= 1 {
+			for _, line := range ilines {
+				var distance int
+				distance = int(math.Abs(float64(startpoint - line)))
+				for j := 1; j <= distance; j++ {
+					fuel += float64(j)
+				}
+			}
+			if fuel > fuelprev {
+				iterations = i
+				fuel = fuelprev
+				break
 
+			} else {
+				fuelprev = fuel
+			}
+		}
+		startpoint += 1
+		//fmt.Println(fuel)
+	}
+	return int(fuel), iterations
+}
 
-func MathStuff(ilines []int) ( float64, float64) {
+func MathStuff(ilines []int) (float64, float64) {
 	var sd float64
 	var sum float64
 	for _, line := range ilines {
@@ -150,7 +142,7 @@ func MathStuff(ilines []int) ( float64, float64) {
 	}
 
 	average := (float64(sum)) / float64(len(ilines))
-	
+
 	for _, line := range ilines {
 		sd += math.Pow(float64(line)-average, 2)
 	}
@@ -159,6 +151,3 @@ func MathStuff(ilines []int) ( float64, float64) {
 
 	return sd, average
 }
-
-
-
