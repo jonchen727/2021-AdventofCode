@@ -1,12 +1,10 @@
 package main
 
 import (
-//	"crypto/x509"
 	"fmt"
 	"io/ioutil"
 	"os"
-
-	//	"sort"
+	"sort"
 	//	"strconv"
 	"strings"
 	"time"
@@ -32,43 +30,41 @@ func FiletoArray(delim string, arg int) []string {
 	return lines //returns final []string
 }
 
-
 func main() {
 	start := time.Now() //sets current time to start time
 	lines := (FiletoArray("\n", 1))
 
-	var Answer1  int
-	for _,line := range lines {
-		var w,x,y,z int // ) ] } > 
+	Answer1, Answer2 := Answers(lines)
+	fmt.Println("Answer 1:", Answer1)
+	fmt.Println("Answer 2:", Answer2)
+
+	fmt.Println()
+	duration := time.Since(start) //sets duration to time difference since start
+	fmt.Println("This Script took:", duration, "to complete!")
+}
+
+func Answers(lines []string) (int, int) {
+	var Answer1 int
+	var ScoreArray []int
+	for _, line := range lines {
 		var match string
-		for _,character := range line {
+		for _, character := range line {
 			a := string(character)
 			switch a {
-				case "(":
-					w += 1
-					match += ")"
-				case ")":
-					w -= 1
-				case "[":
-					x += 1
-					match += "]"
-				case "]":
-					x -= 1
-				case "{":
-					y += 1
-					match += "}"
-				case "}":
-					y -= 1
-				case "<": 
-					z += 1
-					match += ">"
-				case ">":
-					z -= 1
-			} 
+			case "(":
+				match += ")"
+			case "[":
+				match += "]"
+			case "{":
+				match += "}"
+			case "<":
+				match += ">"
+
+			}
 			if a == string(match[len(match)-1]) {
-			match = match[:len(match)-1]
+				match = match[:len(match)-1]
 			} else if (a == "]" || a == "}" || a == ">" || a == ")") && (a != string(match[len(match)-1])) {
-				fmt.Println(a)
+
 				switch a {
 				case ")":
 					Answer1 += 3
@@ -78,19 +74,42 @@ func main() {
 					Answer1 += 1197
 				case ">":
 					Answer1 += 25137
-				
+
 				}
-			break
+				match = ""
+				break
 			}
-		
+
+		}
+		var tpoints int
+
+		for i := len(match) - 1; i >= 0; i-- {
+			a := string(match[i])
+			switch a {
+			case ")":
+				tpoints *= 5
+				tpoints += 1
+			case "]":
+				tpoints *= 5
+				tpoints += 2
+			case "}":
+				tpoints *= 5
+				tpoints += 3
+			case ">":
+				tpoints *= 5
+				tpoints += 4
+
+			}
+
+		}
+
+		if tpoints > 0 {
+			ScoreArray = append(ScoreArray, tpoints)
 		}
 	}
-	fmt.Println(Answer1)
-	
 
-	
-	fmt.Println()
-	duration := time.Since(start) //sets duration to time difference since start
-	fmt.Println("This Script took:", duration, "to complete!")
+	sort.Ints(ScoreArray)
+	//fmt.Println(ScoreArray)
+	Answer2 := ScoreArray[(len(ScoreArray)-1)/2]
+	return Answer1, Answer2
 }
-
