@@ -10,8 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/gookit/color"
+	//	"github.com/gookit/color"
 	//"go.uber.org/zap/internal/color"
 )
 
@@ -41,121 +40,113 @@ func main() {
 	//ilines := StringtoInt(lines)
 	ilines := NestArray(lines)
 
-
 	SimulateTurn(ilines, 100)
-	
-
-
-
 
 	fmt.Println()
 	duration := time.Since(start) //sets duration to time difference since start
 	fmt.Println("This Script took:", duration, "to complete!")
 }
 
-//func StringtoInt(sLines []string) []int {
-//	var iLines []int
-//
-//	for _, sLine := range sLines { //for each line in sLine
-//		iLine, _ := strconv.Atoi(sLine) //convert the string to int
-//		iLines = append(iLines, iLine)  //add converted line to iLines
-//	}
-//	return iLines
-//}
-
-func SimulateTurn (ilines [][]int, turns int) {
+func SimulateTurn(ilines [][]int, turn1 int) {
 	var flashes int
-	for i := 0 ; i <= turns; i++ {
-//		turnflash := 0
-		if i == 0 {
-			fmt.Println("Turn = 0 ")
-			for _,line := range ilines{
-				//fmt.Println(line)
-				for _,character := range line {
-					Colorize(character)
-				}
-				fmt.Println()
-			}
-		}else { 
-			for _,line := range ilines{
-				for i := 0 ; i < len(line); i++ {
+	var flashsync []int
+	//var realturn int
+	for turn := 0; turn <= 9999; turn++ {
+		turnflash := 0
+		//realturn = turn
+		if turn == 0 {
+			//fmt.Println("Turn = 0 ")
+			//for _,line := range ilines{
+			//	//fmt.Println(line)
+			//	for _,character := range line {
+			//		Colorize(character)
+			//	}
+			//	fmt.Println()
+			//}
+		} else {
+			for _, line := range ilines {
+				for i := 0; i < len(line); i++ {
 					line[i] += 1
-					}
 				}
-				for {
-					trigger := false 
-					for j, lines := range ilines{
-						for i := 0 ; i < len(lines); i++ {
-							if lines[i] > 9 {
-								//fmt.Println("we exploded")
-								trigger = true
-								lines[i] = -1000
-								for q := -1 ; q <= 1 ; q++ {
-									jq := q+j
-									if jq >= 0 && jq < len(lines){
-										for r := -1; r <= 1; r++ {
-											ri := r+i
-											if ri >= 0 && ri < len(ilines) {
-												ilines[jq][ri] += 1
-											}
+			}
+			for {
+				trigger := false
+				for j, lines := range ilines {
+					for i := 0; i < len(lines); i++ {
+						if lines[i] > 9 {
+							//fmt.Println("we exploded")
+							trigger = true
+							lines[i] = -1000
+							for q := -1; q <= 1; q++ {
+								jq := q + j
+								if jq >= 0 && jq < len(lines) {
+									for r := -1; r <= 1; r++ {
+										ri := r + i
+										if ri >= 0 && ri < len(ilines) {
+											ilines[jq][ri] += 1
 										}
 									}
-									
 								}
 							}
 						}
-					}
-					if trigger == false {
-						for _,lines := range ilines{
-							for i:=0 ; i< len(lines); i++ {
-								if lines[i] < 0 {
-									lines[i] = 0
-									flashes += 1
-								}
-							}
-						}
-						break
 					}
 				}
-				fmt.Println()
-				fmt.Println("Turn =",i)
-				for _,line := range ilines{
-					//fmt.Println(line)
-					for _,character := range line {
-						Colorize(character)
+				if trigger == false {
+					for _, lines := range ilines {
+						for i := 0; i < len(lines); i++ {
+							if lines[i] < 0 {
+								lines[i] = 0
+								if turn <= turn1 {
+									flashes += 1
+								}
+								turnflash += 1
+								if turnflash == len(ilines)*len(ilines[0]) {
+									flashsync = append(flashsync, turn)
+									turn = 9999
+								}
+							}
+						}
 					}
-					fmt.Println()
+					break
+				}
 			}
-			}
-
-
+			//	fmt.Println()
+			//	fmt.Println("Turn =",realturn)
+			//	for _,line := range ilines{
+			//		//fmt.Println(line)
+			//		for _,character := range line {
+			//			Colorize(character)
+			//		}
+			//		fmt.Println()
+			//}
 		}
-		fmt.Println()
-		fmt.Println(flashes)
+
+	}
+	fmt.Println()
+	fmt.Println("Answer 1:", flashes)
+	fmt.Println("Answer 2:", flashsync)
 
 }
-		
 
-
-
-func NestArray (lines []string) [][]int {
-	var Arrays [][]int 
-	for _,lines := range lines {
+func NestArray(lines []string) [][]int {
+	var Arrays [][]int
+	for _, lines := range lines {
 		var Array []int
-		
-		for _,character := range lines {
-			a,_ := strconv.Atoi(string(character))
+		for _, character := range lines {
+			a, _ := strconv.Atoi(string(character))
 			Array = append(Array, a)
 		}
-		Arrays = append(Arrays,	Array)
+		Arrays = append(Arrays, Array)
 	}
 	return Arrays
 }
 
-func Colorize (character int) {
-	switch character {
-	case 0: color.Bold.Print(character)
-	default: fmt.Print(character)
-	}
-	
-}
+//func Colorize(character int) {
+//	switch character {
+//	case 0:
+//		color.Bold.Print(character)
+//	default:
+//		fmt.Print(character)
+//	}
+//
+//}
