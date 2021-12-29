@@ -10,7 +10,7 @@ import (
 
 	//	"container/heap"
 	"sort"
-	//	"strconv"
+	"strconv"
 	"strings"
 	"time"
 	//	"github.com/gookit/color"
@@ -57,44 +57,67 @@ func ParseFile(arg int) (string, map[string]string, map[string]int) {
 func main() {
 	start := time.Now() //sets current time to start time
 
-	Template, Rule, Total := ParseFile(1)
-	InsertRule(Template, Rule, 10, Total)
-	//fmt.Println(Total)
+	cache := Cache{}
 
-	Answer1(Total)
+	Template, Rule, Total := ParseFile(1)
+
+	fmt.Println("Answer 1")
+	Total1 := addtoMap(InsertRule(Template, Rule, 10, cache), Total)
+	mostMinusleast(Total1)
+
+	fmt.Println()
+	fmt.Println("Answer 2")
+
+	Total2 := addtoMap(InsertRule(Template, Rule, 40, cache), Total)
+	mostMinusleast(Total2)
 
 	fmt.Println()
 	duration := time.Since(start) //sets duration to time difference since start
 	fmt.Println("This Script took:", duration, "to complete!")
 }
 
-func InsertRule(template string, rule map[string]string, steps int, total map[string]int) {
-	fmt.Println("Template:", template)
-	fmt.Println()
+type Cache = map[string]map[string]int
+type Total = map[string]int
 
-	for i := 1; i <= steps; i++ {
-		//fmt.Println("Step:",i)
-		counter := 0
+func InsertRule(template string, rule map[string]string, steps int, cache Cache) map[string]int {
 
-		for j := 0; j <= (len(template) - counter - 2); j++ {
-			pair := template[j+counter : j+2+counter]
-			//fmt.Println("Pair:",pair,"J:",j)
-			//fmt.Println(template)
-			insert := string(rule[pair])
-
-			template = template[:j+1+counter] + insert + template[j+1+counter:]
-
-			total[insert] += 1
-			counter += 1
-
-		}
-		//fmt.Println(template)
-		//fmt.Println("Length:",len(template))
+	if steps == 0 {
+		return Total{}
 	}
+
+	cacheKey := template + strconv.Itoa(steps)
+	if total2, ok := cache[cacheKey]; ok {
+		return total2
+	}
+
+	steps -= 1
+
+	total2 := Total{}
+
+	for i := 0; i < len(template)-1; i++ {
+		front := string(template[i])
+		back := string(template[i+1])
+
+		if insert, ok := rule[front+back]; ok {
+			total2[insert] += 1
+			total2 = addtoMap(total2, InsertRule(front+insert+back, rule, steps, cache))
+		}
+	}
+	cache[cacheKey] = total2
+
+	return total2
 
 }
 
-func Answer1(total map[string]int) {
+func addtoMap(total1 map[string]int, total2 map[string]int) map[string]int {
+
+	for k, v := range total2 {
+		total1[k] += v
+	}
+	return total1
+}
+
+func mostMinusleast(total map[string]int) {
 	p := make(PairList, len(total))
 	i := 0
 	for k, v := range total {
@@ -108,7 +131,7 @@ func Answer1(total map[string]int) {
 	fmt.Println("Most:", p[most_index].Key, "at", most_value)
 	fmt.Println("Least:", p[0].Key, "at", least_value)
 	fmt.Println()
-	fmt.Println("Answer 1:", (most_value - least_value))
+	fmt.Println("Most-Least:", (most_value - least_value))
 }
 
 type Pair struct {
