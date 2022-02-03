@@ -6,6 +6,7 @@ import (
 )
 
 func main () {
-	somestring := os.Args[1]
+	somestring := string(os.Args[1])
 	fmt.Println(somestring)
+
 }

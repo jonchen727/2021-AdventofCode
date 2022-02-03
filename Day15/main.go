@@ -8,7 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	//	"container/heap"
+	"container/heap"
 //	"sort"
 	"strconv"
 	"strings"
@@ -74,8 +74,45 @@ func main() {
 	fmt.Println("This Script took:", duration, "to complete!")
 }
 
-type Solutions = map[string]int
+//Creates PathNode Struct used for A* Algo
+type PathNode struct {
+	Point
+	Risk int 
+	PathScore int
+	Neighbors []*PathNode
+}
+//Creates Point Struct used in PathNode Struct
+type Point struct {
+	x, y int 
+}
+//Creates PathQueue and sets type to array of PathNode pointer
+type PathQueue []*PathNode
 
+func (pq PathQueue) Len() int {
+	return len(pq)
+}
+
+func (pq PathQueue) Less(i, j int) bool {
+	return pq[i].PathScore < pq[j].PathScore
+}
+
+func (pq PathQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *PathQueue) Push(x interface{}) {
+	node := x.(*PathNode)
+	*pq = append(*pq, node)
+}
+
+func (pq *PathQueue) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	node := old[n-1]
+	old[n-1] = nil
+	*pq = old[:n-1]
+	return node
+}
 type Neighbors = map[string]map[string]int
 
 func generateSolutions (maze [][]int, neighbors Neighbors, x int, y int, path string, risk int, last string, value int, solutions Solutions, currentmin *int, cache map[string]int) {
@@ -209,3 +246,5 @@ func CreateMap(maze [][]int) Neighbors {
 	return neighbors
 }
 
+https://www.facebook.com/connect/login_success.html#access_token=EAAGm0PX4ZCpsBALA6Q7x4c5oOZCKjoikfxGs3oboooBywrZCmN08XuOcPs7GcNIhi7k4TBaX8cHpA0s48TYYAUNrdQBWlZCZB7ZAk125E1MCfzMgSweLoHoOFMhmWqRFPbyMvZAIQBX0Wbl5hvYqCSmlkag5Pwzb8GOYchEdjytMJkSPfIjCZAfHdN8D5yb8yaL3RB4i4BQiMgZDZD&data_access_expiration_time=1648998509&expires_in=6691&long_lived_token=EAAGm0PX4ZCpsBAC5dwQkvhe1XN9n9ZAXouNq7mZAeaqEaNleM5lrM8g1sI7Q5DQ3p9m8ZCd40jhoqPU2GGcZCFx8RVnwgoZAUVW3KxPlJ4DAEfZAtIjaQw2XXaAZB4NQRhJ3zUyD9ro5Bf5iFKuSd7hCRKNmcaKx2zDSkdTx8GtK5mcFUqxOT1NI
+EAAGm0PX4ZCpsBALA6Q7x4c5oOZCKjoikfxGs3oboooBywrZCmN08XuOcPs7GcNIhi7k4TBaX8cHpA0s48TYYAUNrdQBWlZCZB7ZAk125E1MCfzMgSweLoHoOFMhmWqRFPbyMvZAIQBX0Wbl5hvYqCSmlkag5Pwzb8GOYchEdjytMJkSPfIjCZAfHdN8D5yb8yaL3RB4i4BQiMgZDZD
